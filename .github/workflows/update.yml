@@ -19,8 +19,7 @@ jobs:
         run: pip install requests beautifulsoup4 --break-system-packages
 
       - name: Scrape and update
-        run: |
-          python3 scraper.py
+        run: python3 scraper.py
 
       - name: Commit and push
         run: |

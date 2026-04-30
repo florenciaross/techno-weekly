@@ -3,651 +3,154 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Techno Weekly Radar</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<title>Techno Weekly</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #0a0a0a;
-    --surface: #111111;
-    --surface2: #1a1a1a;
-    --border: #2a2a2a;
-    --accent: #e8ff47;
-    --accent2: #ff4747;
-    --text: #f0ede8;
-    --muted: #666;
-    --mono: 'DM Mono', monospace;
-    --sans: 'Syne', sans-serif;
+    --bg: #0d0d0d; --fg: #e8e4dd; --muted: #555; --dim: #252525; --accent: #c8f542;
+    --mono: 'IBM Plex Mono', monospace; --display: 'Bebas Neue', sans-serif;
   }
+  html, body { background: var(--bg); color: var(--fg); font-family: var(--mono); min-height: 100vh; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+  .header { border-bottom: 1px solid var(--dim); padding-bottom: 2rem; margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
+  .title { font-family: var(--display); font-size: clamp(52px, 10vw, 88px); line-height: 0.9; }
+  .title span { color: var(--accent); }
+  .meta { text-align: right; }
+  .week-date { font-size: 11px; color: var(--accent); letter-spacing: 0.08em; display: block; margin-bottom: 5px; }
+  .genre-line { font-size: 10px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    min-height: 100vh;
-    padding: 0;
-    overflow-x: hidden;
+  .top-picks { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .picks-icon { font-size: 15px; line-height: 1; }
+  .picks-text { font-size: 11px; color: var(--fg); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 400; white-space: nowrap; }
+  .picks-text strong { color: var(--accent); font-weight: 500; }
+  .picks-divider { flex: 1; height: 1px; background: var(--dim); }
+  .picks-vibes { font-size: 10px; color: var(--muted); letter-spacing: 0.05em; white-space: nowrap; }
+
+  .labels-strip { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--dim); }
+  .label-pill { font-size: 10px; color: #666; letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid #2a2a2a; padding: 3px 10px; border-radius: 20px; }
+
+  .list { display: flex; flex-direction: column; }
+  .track {
+    display: grid; grid-template-columns: 32px 1fr auto; gap: 0 1.25rem;
+    padding: 1.05rem 0; border-bottom: 1px solid var(--dim); align-items: baseline;
+    opacity: 0; transform: translateY(6px); animation: up 0.3s forwards;
   }
+  @keyframes up { to { opacity: 1; transform: none; } }
+  .track:nth-child(1)  { animation-delay: .03s } .track:nth-child(2)  { animation-delay: .06s }
+  .track:nth-child(3)  { animation-delay: .09s } .track:nth-child(4)  { animation-delay: .12s }
+  .track:nth-child(5)  { animation-delay: .15s } .track:nth-child(6)  { animation-delay: .18s }
+  .track:nth-child(7)  { animation-delay: .21s } .track:nth-child(8)  { animation-delay: .24s }
+  .track:nth-child(9)  { animation-delay: .27s } .track:nth-child(10) { animation-delay: .30s }
+  .track:nth-child(11) { animation-delay: .33s } .track:nth-child(12) { animation-delay: .36s }
+  .track:nth-child(13) { animation-delay: .39s } .track:nth-child(14) { animation-delay: .42s }
+  .track:nth-child(15) { animation-delay: .45s } .track:nth-child(16) { animation-delay: .48s }
+  .track:nth-child(17) { animation-delay: .51s } .track:nth-child(18) { animation-delay: .54s }
+  .track:nth-child(19) { animation-delay: .57s } .track:nth-child(20) { animation-delay: .60s }
 
-  /* Scan line effect */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.03) 2px,
-      rgba(0,0,0,0.03) 4px
-    );
-    pointer-events: none;
-    z-index: 1000;
-  }
+  .num { font-size: 11px; color: var(--muted); font-weight: 300; padding-top: 2px; }
+  .track-name { font-size: 14px; font-weight: 500; color: var(--fg); line-height: 1.4; margin-bottom: 3px; }
+  .track-name em { font-style: normal; color: var(--accent); }
+  .details { font-size: 11px; color: var(--muted); font-weight: 300; display: flex; flex-wrap: wrap; gap: 0 .85rem; }
+  .tag { font-size: 10px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--dim); padding: 2px 7px; border-radius: 2px; white-space: nowrap; align-self: center; }
+  .footer { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--dim); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; line-height: 1.8; }
 
-  .header {
-    border-bottom: 1px solid var(--border);
-    padding: 2rem 3rem;
-    display: flex;
-    align-items: baseline;
-    gap: 2rem;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .header::after {
-    content: 'TECHNO';
-    position: absolute;
-    right: -20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: var(--sans);
-    font-size: 120px;
-    font-weight: 800;
-    color: rgba(232,255,71,0.04);
-    letter-spacing: -4px;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-
-  .logo {
-    font-family: var(--sans);
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    line-height: 1;
-  }
-
-  .logo span { color: var(--accent); }
-
-  .tagline {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .bpm-ticker {
-    margin-left: auto;
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 0.15em;
-    animation: blink 2s step-end infinite;
-  }
-
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-  .main {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    min-height: calc(100vh - 89px);
-  }
-
-  .sidebar {
-    border-right: 1px solid var(--border);
-    padding: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  .section-label {
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 0.75rem;
-  }
-
-  .genre-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .genre-btn {
-    background: none;
-    border: 1px solid transparent;
-    color: var(--muted);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 10px 14px;
-    text-align: left;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .genre-btn::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--muted);
-    flex-shrink: 0;
-    transition: background 0.15s;
-  }
-
-  .genre-btn:hover {
-    color: var(--text);
-    border-color: var(--border);
-    background: var(--surface);
-  }
-
-  .genre-btn.active {
-    color: var(--accent);
-    border-color: rgba(232,255,71,0.3);
-    background: rgba(232,255,71,0.05);
-  }
-
-  .genre-btn.active::before { background: var(--accent); }
-
-  .search-section { display: flex; flex-direction: column; gap: 8px; }
-
-  .search-input {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--mono);
-    font-size: 13px;
-    padding: 12px 14px;
-    border-radius: 4px;
-    width: 100%;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
-  .search-input::placeholder { color: var(--muted); }
-  .search-input:focus { border-color: var(--accent); }
-
-  .search-btn {
-    background: var(--accent);
-    border: none;
-    color: #0a0a0a;
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 700;
-    padding: 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    transition: all 0.15s;
-    width: 100%;
-  }
-
-  .search-btn:hover { background: #f5ff80; transform: translateY(-1px); }
-  .search-btn:active { transform: translateY(0); }
-
-  .sources {
-    margin-top: auto;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
-  }
-
-  .source-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .source-item {
-    font-size: 11px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .source-item::before {
-    content: '→';
-    color: var(--accent);
-    font-size: 10px;
-  }
-
-  .content {
-    padding: 2rem 3rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-
-  .content-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .week-label {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  .track-count {
-    font-size: 11px;
-    color: var(--accent);
-  }
-
-  /* Track cards */
-  .tracks-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-
-  .track-card {
-    background: var(--surface);
-    padding: 1.25rem 1.5rem;
-    display: grid;
-    grid-template-columns: 36px 1fr auto;
-    gap: 1rem;
-    align-items: start;
-    cursor: pointer;
-    transition: background 0.1s;
-    text-decoration: none;
-  }
-
-  .track-card:hover { background: var(--surface2); }
-
-  .track-num {
-    font-size: 11px;
-    color: var(--muted);
-    padding-top: 3px;
-    letter-spacing: 0.05em;
-  }
-
-  .track-body {}
-
-  .track-title {
-    font-family: var(--sans);
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 3px;
-    line-height: 1.3;
-  }
-
-  .track-artist {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-
-  .track-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-
-  .tag {
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 2px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-  }
-
-  .tag-label { background: rgba(255,255,255,0.05); color: #888; border: 1px solid #2a2a2a; }
-  .tag-bpm { background: rgba(232,255,71,0.1); color: var(--accent); border: 1px solid rgba(232,255,71,0.2); }
-  .tag-origin { background: rgba(255,71,71,0.1); color: var(--accent2); border: 1px solid rgba(255,71,71,0.2); }
-  .tag-genre { background: rgba(100,180,255,0.08); color: #6ab4ff; border: 1px solid rgba(100,180,255,0.15); }
-
-  .track-meta {
-    text-align: right;
-    font-size: 10px;
-    color: var(--muted);
-    padding-top: 3px;
-    white-space: nowrap;
-    letter-spacing: 0.05em;
-  }
-
-  /* Empty state */
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    gap: 1rem;
-    color: var(--muted);
-  }
-
-  .empty-icon {
-    font-size: 48px;
-    opacity: 0.3;
-  }
-
-  .empty-title {
-    font-family: var(--sans);
-    font-size: 18px;
-    font-weight: 700;
-    color: #333;
-  }
-
-  .empty-sub {
-    font-size: 12px;
-    text-align: center;
-    line-height: 1.6;
-    max-width: 300px;
-  }
-
-  .instruction-box {
-    background: var(--surface);
-    border: 1px solid rgba(232,255,71,0.2);
-    border-radius: 6px;
-    padding: 1.25rem 1.5rem;
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .instruction-num {
-    width: 24px;
-    height: 24px;
-    background: var(--accent);
-    color: #0a0a0a;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--sans);
-    font-size: 12px;
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-
-  .instruction-text {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-  }
-
-  .instruction-text strong { color: var(--text); }
-
-  /* How it works */
-  .how-it-works {
-    margin-top: auto;
-    padding-top: 2rem;
-    border-top: 1px solid var(--border);
-    display: flex;
-    gap: 2rem;
-  }
-
-  .how-step {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .how-step-num {
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  .how-step-text {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  @media (max-width: 768px) {
-    .main { grid-template-columns: 1fr; }
-    .sidebar { border-right: none; border-bottom: 1px solid var(--border); }
-    .header { padding: 1.5rem; flex-wrap: wrap; }
-    .content { padding: 1.5rem; }
+  @media (max-width: 520px) {
+    .header { flex-direction: column; align-items: flex-start; gap: .75rem; }
+    .meta { text-align: left; }
+    .track { grid-template-columns: 28px 1fr; }
+    .tag { display: none; }
+    .picks-vibes { display: none; }
   }
 </style>
 </head>
 <body>
+<div class="wrap">
+  <header class="header">
+    <div class="title">TECHNO<br><span>WEEKLY</span></div>
+    <div class="meta">
+      <span class="week-date" id="week-date"></span>
+      <span class="genre-line">House · Techno · Indie Dance</span>
+    </div>
+  </header>
 
-<header class="header">
-  <div>
-    <div class="logo">TECHNO<span>.</span>RADAR</div>
-    <div class="tagline">Weekly global releases scanner</div>
+  <div class="top-picks">
+    <span class="picks-icon">🎶</span>
+    <span class="picks-text"><strong>Top 15</strong> — House / Techno / Indie Dance · <span id="month-label"></span></span>
+    <span class="picks-divider"></span>
+    <span class="picks-vibes">Solomun · Diynamic · Innervisions · Keinemusik</span>
   </div>
-  <div class="bpm-ticker" id="bpm-ticker">◉ LIVE — APR 2026</div>
-</header>
 
-<div class="main">
-  <aside class="sidebar">
-    <div>
-      <div class="section-label">Genre filter</div>
-      <div class="genre-list" id="genre-list">
-        <button class="genre-btn active" data-query="top new techno music releases worldwide this week">All techno</button>
-        <button class="genre-btn" data-query="new industrial techno EBM releases this week">Industrial</button>
-        <button class="genre-btn" data-query="new hard techno releases this week">Hard techno</button>
-        <button class="genre-btn" data-query="new dub techno ambient techno releases this week">Ambient / dub</button>
-        <button class="genre-btn" data-query="new acid techno rave techno releases this week">Rave / acid</button>
-        <button class="genre-btn" data-query="new Detroit techno releases this week">Detroit</button>
-        <button class="genre-btn" data-query="new Berlin techno releases this week">Berlin</button>
-      </div>
-    </div>
+  <div class="labels-strip">
+    <span class="label-pill">Diynamic</span>
+    <span class="label-pill">Innervisions</span>
+    <span class="label-pill">Keinemusik</span>
+    <span class="label-pill">Afterlife</span>
+    <span class="label-pill">Cactus &amp; Camel</span>
+    <span class="label-pill">Stil vor Talent</span>
+    <span class="label-pill">Watergate</span>
+    <span class="label-pill">Anjunadeep</span>
+    <span class="label-pill">Crosstown Rebels</span>
+  </div>
 
-    <div class="search-section">
-      <div class="section-label">Custom search</div>
-      <input type="text" class="search-input" id="custom-q" placeholder="artist, label, city..." />
-      <button class="search-btn" onclick="doSearch()">Search on Google ↗</button>
-    </div>
+  <div class="list" id="list"></div>
 
-    <div class="sources">
-      <div class="section-label">Searches across</div>
-      <div class="source-list">
-        <div class="source-item">Resident Advisor</div>
-        <div class="source-item">Bandcamp Daily</div>
-        <div class="source-item">Juno Download</div>
-        <div class="source-item">Beatport charts</div>
-        <div class="source-item">Mixmag / Fact Mag</div>
-      </div>
-    </div>
-  </aside>
-
-  <main class="content">
-    <div class="content-header">
-      <span class="week-label" id="week-label">Week of 28 Apr – 4 May 2026</span>
-      <span class="track-count">Select a genre and search ↙</span>
-    </div>
-
-    <div class="instruction-box">
-      <div class="instruction-num">1</div>
-      <div class="instruction-text">
-        <strong>Pick a genre</strong> on the left (or type a custom search), then hit <strong>Search on Google</strong>. A Google search pre-loaded with the right query opens in a new tab — results from RA, Bandcamp, Juno and Beatport appear right there.
-      </div>
-    </div>
-
-    <div class="instruction-box">
-      <div class="instruction-num">2</div>
-      <div class="instruction-text">
-        <strong>Prefer Claude's picks?</strong> Go back to the Claude.ai chat tab and use the search widget there — Claude will search the web and return a curated numbered list directly in the conversation.
-      </div>
-    </div>
-
-    <div class="tracks-grid">
-      <div class="track-card" style="cursor:default;">
-        <span class="track-num">01</span>
-        <div class="track-body">
-          <div class="track-title">pdqb — Zone Zone EP</div>
-          <div class="track-artist">pdqb</div>
-          <div class="track-tags">
-            <span class="tag tag-label">Phorum</span>
-            <span class="tag tag-bpm">~133 BPM</span>
-            <span class="tag tag-origin">Berlin</span>
-            <span class="tag tag-genre">Experimental techno</span>
-          </div>
-        </div>
-        <div class="track-meta">02 Apr 2026</div>
-      </div>
-
-      <div class="track-card" style="cursor:default;">
-        <span class="track-num">02</span>
-        <div class="track-body">
-          <div class="track-title">Arcane EP</div>
-          <div class="track-artist">Regent</div>
-          <div class="track-tags">
-            <span class="tag tag-label">Phorum</span>
-            <span class="tag tag-bpm">~136 BPM</span>
-            <span class="tag tag-origin">Berlin</span>
-            <span class="tag tag-genre">Dark techno</span>
-          </div>
-        </div>
-        <div class="track-meta">02 Apr 2026</div>
-      </div>
-
-      <div class="track-card" style="cursor:default;">
-        <span class="track-num">03</span>
-        <div class="track-body">
-          <div class="track-title">Debut EP</div>
-          <div class="track-artist">Tremul</div>
-          <div class="track-tags">
-            <span class="tag tag-label">Lift Records</span>
-            <span class="tag tag-bpm">~138 BPM</span>
-            <span class="tag tag-genre">Breaks / techno</span>
-          </div>
-        </div>
-        <div class="track-meta">01 Apr 2026</div>
-      </div>
-
-      <div class="track-card" style="cursor:default;">
-        <span class="track-num">04</span>
-        <div class="track-body">
-          <div class="track-title">Crystalpunk</div>
-          <div class="track-artist">Chalk</div>
-          <div class="track-tags">
-            <span class="tag tag-bpm">~140+ BPM</span>
-            <span class="tag tag-origin">Belfast</span>
-            <span class="tag tag-genre">Industrial techno</span>
-          </div>
-        </div>
-        <div class="track-meta">Mar 2026</div>
-      </div>
-
-      <div class="track-card" style="cursor:default;">
-        <span class="track-num">05</span>
-        <div class="track-body">
-          <div class="track-title">Adagio For Strings (rework)</div>
-          <div class="track-artist">Brennan Heart, HI-LO & Project Zeitgeist</div>
-          <div class="track-tags">
-            <span class="tag tag-bpm">~148 BPM</span>
-            <span class="tag tag-origin">Netherlands</span>
-            <span class="tag tag-genre">Hard techno</span>
-          </div>
-        </div>
-        <div class="track-meta">Apr 2026</div>
-      </div>
-
-      <div class="track-card" style="cursor:default;">
-        <span class="track-num">06</span>
-        <div class="track-body">
-          <div class="track-title">Ephemeral & Fleeting: Modular Music of Japan</div>
-          <div class="track-artist">Various Artists</div>
-          <div class="track-tags">
-            <span class="tag tag-bpm">~110 BPM</span>
-            <span class="tag tag-origin">Japan</span>
-            <span class="tag tag-genre">Ambient techno</span>
-          </div>
-        </div>
-        <div class="track-meta">23 Apr 2026</div>
-      </div>
-    </div>
-
-    <div class="how-it-works">
-      <div class="how-step">
-        <div class="how-step-num">tip 01</div>
-        <div class="how-step-text">The list above shows last week's picks from Claude. Hit Search to get the freshest results from Google right now.</div>
-      </div>
-      <div class="how-step">
-        <div class="how-step-num">tip 02</div>
-        <div class="how-step-text">For curated, annotated picks go back to Claude.ai — Claude reads RA, Bandcamp and Juno and explains each release.</div>
-      </div>
-      <div class="how-step">
-        <div class="how-step-num">tip 03</div>
-        <div class="how-step-text">Bookmark this file. Open it any week to quickly scout Juno, RA or Beatport with one click.</div>
-      </div>
-    </div>
-  </main>
+  <footer class="footer">
+    florenciaross.github.io/techno-weekly &nbsp;·&nbsp; updated every sunday · no hard techno · no acid · no trance
+  </footer>
 </div>
 
 <script>
-  document.querySelectorAll('.genre-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    });
-  });
+// AUTO-GENERATED EACH SUNDAY — do not edit manually
+const tracks = [
+  { artist: "Solomun & Coco Nancy",        title: "Kinesphere",               label: "Diynamic",            genre: "Melodic house",    bpm: "136 BPM", date: "06 Mar 2026" },
+  { artist: "Broken Hill",                 title: "Rock It Like",             label: "Diynamic FTTF48",     genre: "Tech house",       bpm: "111 BPM", date: "10 Apr 2026" },
+  { artist: "Maxim Lany",                  title: "Shifter",                  label: "Diynamic FTTF48",     genre: "Melodic house",    bpm: "120 BPM", date: "10 Apr 2026" },
+  { artist: "Julio Torres & Ketoots",      title: "Stay A Bit Longer",        label: "Diynamic FTTF48",     genre: "Deep house",       bpm: "120 BPM", date: "10 Apr 2026" },
+  { artist: "George Z & Return of Jaded",  title: "Walk The Line",            label: "Diynamic FTTF48",     genre: "Tech house",       bpm: "122 BPM", date: "10 Apr 2026" },
+  { artist: "Jepe",                        title: "Vocoder",                  label: "Innervisions",        genre: "Melodic techno",   bpm: "120 BPM", date: "2026"        },
+  { artist: "Tri/xon",                     title: "WORK/OUT",                 label: "Innervisions",        genre: "Deep techno",      bpm: "—",       date: "2026"        },
+  { artist: "Humans Musik",                title: "All I Need Is You",        label: "Diynamic",            genre: "Deep house",       bpm: "—",       date: "2026"        },
+  { artist: "Solomun feat. Nina Simone",   title: "Take Care Of Business",    label: "Verve",               genre: "Melodic house",    bpm: "130 BPM", date: "20 Feb 2026" },
+  { artist: "Frankey & Sandrino",          title: "Memories EP",              label: "Innervisions",        genre: "Melodic techno",   bpm: "—",       date: "2026"        },
+  { artist: "Solomun",                     title: "Don't Give Up",            label: "SNK",                 genre: "Deep house",       bpm: "128 BPM", date: "20 Feb 2026" },
+  { artist: "Solomun & Denis Sulta",       title: "Say Nothing",              label: "Diynamic",            genre: "Indie dance",      bpm: "—",       date: "Late 2025"   },
+  { artist: "Samm, Ajna & Chelsea Como",   title: "Timeless",                 label: "Magnifik / Scorpios", genre: "Melodic house",    bpm: "—",       date: "2026"        },
+  { artist: "Maesic",                      title: "Technologic",              label: "Tomorrowland Music",  genre: "Deep techno",      bpm: "—",       date: "2026"        },
+  { artist: "Jepe",                        title: "Fantasia",                 label: "Lossless",            genre: "Indie dance",      bpm: "—",       date: "2026"        },
+];
 
-  function doSearch() {
-    const activeBtn = document.querySelector('.genre-btn.active');
-    const custom = document.getElementById('custom-q').value.trim();
-    const baseQuery = activeBtn ? activeBtn.dataset.query : 'top new techno releases this week';
-    const today = new Date();
-    const year = today.getFullYear();
+function getWeekRange() {
+  const now = new Date();
+  const day = now.getDay();
+  const mon = new Date(now); mon.setDate(now.getDate() - ((day + 6) % 7));
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const fmt = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  return `${fmt(mon)} – ${fmt(sun)}`;
+}
+function getMonthLabel() {
+  const now = new Date();
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[now.getMonth()]} ${now.getFullYear()}`;
+}
 
-    let query;
-    if (custom) {
-      query = `new techno releases "${custom}" site:ra.co OR site:daily.bandcamp.com OR site:juno.co.uk OR site:beatport.com ${year}`;
-    } else {
-      query = `${baseQuery} ${year} site:ra.co OR site:daily.bandcamp.com OR site:juno.co.uk OR site:beatport.com`;
-    }
+document.getElementById('week-date').textContent = getWeekRange();
+document.getElementById('month-label').textContent = getMonthLabel();
 
-    const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-    window.open(url, '_blank');
-  }
-
-  // Update week label dynamically
-  function getWeekLabel() {
-    const now = new Date();
-    const day = now.getDay();
-    const monday = new Date(now);
-    monday.setDate(now.getDate() - ((day + 6) % 7));
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    const fmt = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-    return `Week of ${fmt(monday)} – ${fmt(sunday)}`;
-  }
-
-  document.getElementById('week-label').textContent = getWeekLabel();
-
-  // Live BPM ticker
-  const bpms = [128, 130, 132, 133, 135, 136, 138, 140, 142, 145, 148, 150];
-  let bpmIdx = 0;
-  setInterval(() => {
-    bpmIdx = (bpmIdx + 1) % bpms.length;
-    document.getElementById('bpm-ticker').textContent = `◉ ${bpms[bpmIdx]} BPM`;
-  }, 800);
+document.getElementById('list').innerHTML = tracks.map((t, i) => `
+  <div class="track">
+    <span class="num">${String(i+1).padStart(2,'0')}</span>
+    <div class="info">
+      <div class="track-name"><em>${t.artist}</em> — ${t.title}</div>
+      <div class="details">
+        <span>${t.label}</span>
+        ${t.bpm !== '—' ? `<span>${t.bpm}</span>` : ''}
+        <span>${t.date}</span>
+      </div>
+    </div>
+    <span class="tag">${t.genre}</span>
+  </div>
+`).join('');
 </script>
 </body>
 </html>
